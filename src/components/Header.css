@@ -1,0 +1,19 @@
+.header {
+  background: #1a1a2e;
+  color: #fff;
+  padding: 16px 24px;
+  text-align: center;
+}
+
+.header-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.header-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #94a3b8;
+}

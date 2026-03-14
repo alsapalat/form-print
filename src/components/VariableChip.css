@@ -1,0 +1,34 @@
+.variable-chip {
+  padding: 6px 10px;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: monospace;
+  cursor: grab;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.variable-chip:hover {
+  background: #bfdbfe;
+}
+
+.variable-chip:active {
+  cursor: grabbing;
+}
+
+@media (max-width: 640px) {
+  .variable-chip {
+    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .variable-chip:active {
+    cursor: pointer;
+    background: #93c5fd;
+  }
+}

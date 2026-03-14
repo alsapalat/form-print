@@ -1,0 +1,32 @@
+.page-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px;
+  background: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+}
+
+.page-btn {
+  padding: 6px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.page-btn:not(:disabled):hover {
+  background: #e2e8f0;
+}
+
+.page-info {
+  font-size: 13px;
+  color: #475569;
+}

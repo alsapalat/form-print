@@ -1,0 +1,26 @@
+.pdf-preview {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  background: #e2e8f0;
+  min-height: 400px;
+}
+
+.pdf-preview-container {
+  position: relative;
+  display: inline-block;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.pdf-canvas {
+  display: block;
+}
+
+.pdf-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: crosshair;
+}

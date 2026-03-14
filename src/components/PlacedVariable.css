@@ -1,0 +1,52 @@
+.placed-variable {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(239, 68, 68, 0.85);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-family: monospace;
+  cursor: grab;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 10;
+  touch-action: none;
+}
+
+.placed-variable:active {
+  cursor: grabbing;
+}
+
+.placed-variable-label {
+  pointer-events: none;
+}
+
+.placed-variable-remove {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.placed-variable-remove:hover {
+  opacity: 1;
+}
+
+@media (max-width: 640px) {
+  .placed-variable {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .placed-variable-remove {
+    font-size: 16px;
+    padding: 0 4px;
+  }
+}
