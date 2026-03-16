@@ -7,11 +7,26 @@ export async function generateSinglePdf(
   placements,
   row,
   pageDimsMap,
+  { textOnly = false } = {},
 ) {
-  const pdfDoc = await PDFDocument.load(originalBytes);
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const srcDoc = await PDFDocument.load(originalBytes);
+  let pdfDoc;
+  let pages;
 
-  const pages = pdfDoc.getPages();
+  if (textOnly) {
+    pdfDoc = await PDFDocument.create();
+    const srcPages = srcDoc.getPages();
+    for (const sp of srcPages) {
+      const { width, height } = sp.getSize();
+      pdfDoc.addPage([width, height]);
+    }
+    pages = pdfDoc.getPages();
+  } else {
+    pdfDoc = srcDoc;
+    pages = pdfDoc.getPages();
+  }
+
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
   for (const placement of placements) {
     const page = pages[placement.page - 1];
@@ -41,6 +56,7 @@ export async function generateAllPdfs(
   rows,
   pageDimsMap,
   onProgress,
+  { textOnly = false } = {},
 ) {
   const results = [];
   for (let i = 0; i < rows.length; i++) {
@@ -49,6 +65,7 @@ export async function generateAllPdfs(
       placements,
       rows[i],
       pageDimsMap,
+      { textOnly },
     );
     results.push({ index: i, bytes: pdfBytes });
     onProgress?.(i + 1, rows.length);

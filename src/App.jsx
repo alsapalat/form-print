@@ -158,7 +158,7 @@ export default function App() {
 
   const canGenerate = pdfBytes && csvLoaded && rows.length > 0 && placements.length > 0;
 
-  const handleGenerate = useCallback(async () => {
+  const runGenerate = useCallback(async (textOnly = false) => {
     if (!canGenerate) return;
 
     const pagesWithPlacements = [...new Set(placements.map((p) => p.page))];
@@ -176,18 +176,23 @@ export default function App() {
         rows,
         pageDimsRef.current,
         (cur, tot) => setProgress({ current: cur, total: tot }),
+        { textOnly },
       );
-      const baseName = pdfName.replace(/\.pdf$/i, '') || 'output';
+      const suffix = textOnly ? '-print' : '';
+      const baseName = (pdfName.replace(/\.pdf$/i, '') || 'output') + suffix;
       await downloadAsZip(results, baseName);
     } finally {
       setProgress({ current: 0, total: 0 });
     }
   }, [canGenerate, pdfBytes, placements, rows, pageDimsRef, pdfName, renderCurrentPage]);
 
+  const handleGenerate = useCallback(() => runGenerate(false), [runGenerate]);
+  const handleGenerateTextOnly = useCallback(() => runGenerate(true), [runGenerate]);
+
   return (
     <div className="app">
       <Header>
-        <GenerateButton disabled={!canGenerate} onClick={handleGenerate} />
+        <GenerateButton disabled={!canGenerate} onClick={handleGenerate} onClickTextOnly={handleGenerateTextOnly} />
       </Header>
       <FileUploadPanel
         onPdfUpload={handlePdfUpload}

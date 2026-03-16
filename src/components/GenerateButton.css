@@ -1,3 +1,8 @@
+.generate-group {
+  display: flex;
+  gap: 8px;
+}
+
 .generate-btn {
   padding: 10px 32px;
   background: #16a34a;
@@ -13,6 +18,14 @@
 
 .generate-btn:hover:not(:disabled) {
   background: #15803d;
+}
+
+.generate-btn--text-only {
+  background: #2563eb;
+}
+
+.generate-btn--text-only:hover:not(:disabled) {
+  background: #1d4ed8;
 }
 
 .generate-btn:disabled {
