@@ -9,7 +9,6 @@ export default function PdfPreview({
   currentPage,
   onDragOver,
   onDrop,
-  onDragStartMove,
   onMove,
   onRemove,
   pdfDoc,
@@ -41,7 +40,6 @@ export default function PdfPreview({
               <PlacedVariable
                 key={p.id}
                 placement={p}
-                onDragStart={onDragStartMove}
                 onMove={onMove}
                 onRemove={onRemove}
               />

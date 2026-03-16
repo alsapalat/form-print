@@ -80,7 +80,7 @@ export default function App() {
 
   const { headers, rows, csvLoaded, loadCsv } = useCsvParser();
 
-  const { handleDragStartNew, handleDragStartMove, handleDragOver, handleDrop } =
+  const { handleDragStartNew, handleDragOver, handleDrop } =
     useDragAndDrop(dispatch, currentPage, snapFn);
 
   // Auto-save placements to localStorage when they change
@@ -186,7 +186,9 @@ export default function App() {
 
   return (
     <div className="app">
-      <Header />
+      <Header>
+        <GenerateButton disabled={!canGenerate} onClick={handleGenerate} />
+      </Header>
       <FileUploadPanel
         onPdfUpload={handlePdfUpload}
         onCsvUpload={handleCsvUpload}
@@ -240,7 +242,6 @@ export default function App() {
                 currentPage={currentPage}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
-                onDragStartMove={handleDragStartMove}
                 onMove={handleMove}
                 onRemove={handleRemove}
                 pdfDoc={pdfDoc}
@@ -259,7 +260,6 @@ export default function App() {
           )}
         </div>
       </div>
-      <GenerateButton disabled={!canGenerate} onClick={handleGenerate} />
       {progress.total > 0 && (
         <ProgressModal current={progress.current} total={progress.total} />
       )}
