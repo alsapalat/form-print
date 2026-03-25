@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { overlayToPdf } from './coordinateMapper';
-import { DEFAULT_FONT_SIZE } from '../constants';
+import { wrapText, LINE_HEIGHT_FACTOR } from './textWrapper';
+import { DEFAULT_FONT_SIZE, DEFAULT_WIDTH, SCALE_FACTOR } from '../constants';
 
 export async function generateSinglePdf(
   originalBytes,
@@ -36,15 +37,21 @@ export async function generateSinglePdf(
     if (!dims) continue;
 
     const { pdfX, pdfY } = overlayToPdf(placement.x, placement.y, dims);
-    const text = row[placement.variable] ?? '';
+    const text = String(row[placement.variable] ?? '');
+    const fontSize = placement.fontSize ?? DEFAULT_FONT_SIZE;
+    const pdfWidth = (placement.width ?? DEFAULT_WIDTH) / SCALE_FACTOR;
 
-    page.drawText(String(text), {
-      x: pdfX,
-      y: pdfY - DEFAULT_FONT_SIZE,
-      size: DEFAULT_FONT_SIZE,
-      font,
-      color: rgb(0, 0, 0),
-    });
+    const lines = wrapText(text, font, fontSize, pdfWidth);
+
+    for (let i = 0; i < lines.length; i++) {
+      page.drawText(lines[i], {
+        x: pdfX,
+        y: pdfY - fontSize - i * fontSize * LINE_HEIGHT_FACTOR,
+        size: fontSize,
+        font,
+        color: rgb(0, 0, 0),
+      });
+    }
   }
 
   return pdfDoc.save();

@@ -4,6 +4,7 @@ import FileUploadPanel from './components/FileUploadPanel';
 import VariablePanel from './components/VariablePanel';
 import PdfPreview from './components/PdfPreview';
 import PageNavigation from './components/PageNavigation';
+import DataPreviewToggle from './components/DataPreviewToggle';
 import GenerateButton from './components/GenerateButton';
 import ProgressModal from './components/ProgressModal';
 import { usePdfRenderer } from './hooks/usePdfRenderer';
@@ -17,17 +18,19 @@ import {
   exportTemplate,
   importTemplate,
 } from './utils/templateStorage';
-import { SNAP_GRID } from './constants';
+import { SNAP_GRID, DEFAULT_FONT_SIZE, DEFAULT_WIDTH, SCALE_FACTOR } from './constants';
 import './App.css';
 
 let nextId = 1;
+
+const placementDefaults = { fontSize: DEFAULT_FONT_SIZE, width: DEFAULT_WIDTH };
 
 function placementsReducer(state, action) {
   switch (action.type) {
     case 'ADD':
       return [
         ...state,
-        { id: String(nextId++), ...action.payload },
+        { id: String(nextId++), ...placementDefaults, ...action.payload },
       ];
     case 'MOVE':
       return state.map((p) =>
@@ -35,10 +38,16 @@ function placementsReducer(state, action) {
           ? { ...p, x: action.payload.x, y: action.payload.y }
           : p,
       );
+    case 'UPDATE':
+      return state.map((p) =>
+        p.id === action.payload.id
+          ? { ...p, ...action.payload.changes }
+          : p,
+      );
     case 'REMOVE':
       return state.filter((p) => p.id !== action.payload.id);
     case 'LOAD':
-      return action.payload.map((p) => ({ id: String(nextId++), ...p }));
+      return action.payload.map((p) => ({ id: String(nextId++), ...placementDefaults, ...p }));
     case 'CLEAR_ALL':
       return [];
     default:
@@ -52,6 +61,7 @@ export default function App() {
   const [placements, dispatch] = useReducer(placementsReducer, []);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [snapEnabled, setSnapEnabled] = useState(false);
+  const [previewRowIndex, setPreviewRowIndex] = useState(null);
   const importRef = useRef(null);
 
   const snapFn = useCallback(
@@ -80,6 +90,8 @@ export default function App() {
 
   const { headers, rows, csvLoaded, loadCsv } = useCsvParser();
 
+  const previewRow = previewRowIndex !== null ? rows[previewRowIndex] ?? null : null;
+
   const { handleDragStartNew, handleDragOver, handleDrop } =
     useDragAndDrop(dispatch, currentPage, snapFn);
 
@@ -103,6 +115,7 @@ export default function App() {
   const handleCsvUpload = useCallback(
     async (file) => {
       setCsvName(file.name);
+      setPreviewRowIndex(null);
       const result = await loadCsv(file);
       // Auto-load saved template for these headers
       const saved = loadTemplate(result.headers);
@@ -115,6 +128,10 @@ export default function App() {
 
   const handleRemove = useCallback((id) => {
     dispatch({ type: 'REMOVE', payload: { id } });
+  }, []);
+
+  const handleUpdatePlacement = useCallback((id, changes) => {
+    dispatch({ type: 'UPDATE', payload: { id, changes } });
   }, []);
 
   const handleMove = useCallback((id, x, y) => {
@@ -249,13 +266,22 @@ export default function App() {
                 onDrop={handleDrop}
                 onMove={handleMove}
                 onRemove={handleRemove}
+                onUpdate={handleUpdatePlacement}
+                scaleFactor={SCALE_FACTOR}
                 pdfDoc={pdfDoc}
                 renderCurrentPage={renderCurrentPage}
+                previewRow={previewRow}
               />
               <PageNavigation
                 currentPage={currentPage}
                 numPages={numPages}
                 onPageChange={goToPage}
+              />
+              <DataPreviewToggle
+                previewRowIndex={previewRowIndex}
+                numRows={rows.length}
+                onToggle={(enabled) => setPreviewRowIndex(enabled ? 0 : null)}
+                onRowChange={setPreviewRowIndex}
               />
             </>
           ) : (

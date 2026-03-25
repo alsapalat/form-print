@@ -14,11 +14,13 @@ function hashHeaders(headers) {
 }
 
 function buildTemplateData(placements) {
-  return placements.map(({ variable, x, y, page }) => ({
+  return placements.map(({ variable, x, y, page, fontSize, width }) => ({
     variable,
     x,
     y,
     page,
+    fontSize,
+    width,
   }));
 }
 

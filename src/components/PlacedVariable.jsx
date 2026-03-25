@@ -1,10 +1,12 @@
 import { useRef, useCallback } from 'react';
+import { MIN_WIDTH } from '../constants';
 import './PlacedVariable.css';
 
-export default function PlacedVariable({ placement, onMove, onRemove }) {
+export default function PlacedVariable({ placement, onMove, onRemove, onUpdate, scaleFactor, previewRow }) {
   const dragRef = useRef(null);
+  const resizeRef = useRef(null);
 
-  // --- Mouse (desktop) ---
+  // --- Box drag: Mouse (desktop) ---
   const handleMouseDown = useCallback((e) => {
     if (e.button !== 0) return;
     e.preventDefault();
@@ -31,7 +33,7 @@ export default function PlacedVariable({ placement, onMove, onRemove }) {
     document.addEventListener('mouseup', handleMouseUp);
   }, [placement.id, onMove]);
 
-  // --- Touch (mobile) ---
+  // --- Box drag: Touch (mobile) ---
   const handleTouchStart = useCallback((e) => {
     const touch = e.touches[0];
     const rect = e.currentTarget.getBoundingClientRect();
@@ -60,24 +62,112 @@ export default function PlacedVariable({ placement, onMove, onRemove }) {
     dragRef.current = null;
   }, []);
 
+  // --- Resize handle: Mouse ---
+  const handleResizeMouseDown = useCallback((e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = placement.width;
+
+    const handleMouseMove = (me) => {
+      const delta = me.clientX - startX;
+      const newWidth = Math.max(MIN_WIDTH, startWidth + delta);
+      onUpdate(placement.id, { width: newWidth });
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [placement.id, placement.width, onUpdate]);
+
+  // --- Resize handle: Touch ---
+  const handleResizeTouchStart = useCallback((e) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    resizeRef.current = {
+      startX: touch.clientX,
+      startWidth: placement.width,
+    };
+  }, [placement.width]);
+
+  const handleResizeTouchMove = useCallback((e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!resizeRef.current) return;
+    const touch = e.touches[0];
+    const delta = touch.clientX - resizeRef.current.startX;
+    const newWidth = Math.max(MIN_WIDTH, resizeRef.current.startWidth + delta);
+    onUpdate(placement.id, { width: newWidth });
+  }, [placement.id, onUpdate]);
+
+  const handleResizeTouchEnd = useCallback((e) => {
+    e.stopPropagation();
+    resizeRef.current = null;
+  }, []);
+
+  // --- Font size controls ---
+  const changeFontSize = useCallback((delta) => {
+    const next = Math.min(72, Math.max(6, placement.fontSize + delta));
+    onUpdate(placement.id, { fontSize: next });
+  }, [placement.id, placement.fontSize, onUpdate]);
+
+  const previewFontPx = placement.fontSize * scaleFactor;
+
+  const previewing = !!previewRow;
+
+  const displayText = previewRow
+    ? (previewRow[placement.variable] ?? `{{${placement.variable}}}`)
+    : `{{${placement.variable}}}`;
+
   return (
     <div
-      className="placed-variable"
-      style={{ left: placement.x, top: placement.y }}
-      onMouseDown={handleMouseDown}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      className={`placed-variable${previewing ? ' previewing' : ''}`}
+      style={{ left: placement.x, top: placement.y, width: placement.width }}
+      onMouseDown={previewing ? undefined : handleMouseDown}
+      onTouchStart={previewing ? undefined : handleTouchStart}
+      onTouchMove={previewing ? undefined : handleTouchMove}
+      onTouchEnd={previewing ? undefined : handleTouchEnd}
     >
-      <span className="placed-variable-label">{`{{${placement.variable}}}`}</span>
-      <button
-        className="placed-variable-remove"
-        onMouseDown={(e) => e.stopPropagation()}
-        onClick={() => onRemove(placement.id)}
-        title="Remove"
+      {!previewing && (
+        <>
+          {/* Toolbar */}
+          <div className="pv-toolbar" onMouseDown={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+            <div className="pv-font-controls">
+              <button className="pv-btn" onClick={() => changeFontSize(-1)} title="Decrease font size">&minus;</button>
+              <span className="pv-font-size">{placement.fontSize}</span>
+              <button className="pv-btn" onClick={() => changeFontSize(1)} title="Increase font size">+</button>
+            </div>
+            <button
+              className="pv-btn pv-close"
+              onClick={() => onRemove(placement.id)}
+              title="Remove"
+            >
+              &times;
+            </button>
+          </div>
+
+          {/* Resize handle */}
+          <div
+            className="pv-resize-handle"
+            onMouseDown={handleResizeMouseDown}
+            onTouchStart={handleResizeTouchStart}
+            onTouchMove={handleResizeTouchMove}
+            onTouchEnd={handleResizeTouchEnd}
+          />
+        </>
+      )}
+
+      {/* Content area */}
+      <div
+        className="pv-content"
+        style={{ fontSize: previewFontPx, lineHeight: 1.2 }}
       >
-        &times;
-      </button>
+        {displayText}
+      </div>
     </div>
   );
 }

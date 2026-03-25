@@ -11,8 +11,11 @@ export default function PdfPreview({
   onDrop,
   onMove,
   onRemove,
+  onUpdate,
+  scaleFactor,
   pdfDoc,
   renderCurrentPage,
+  previewRow,
 }) {
   useEffect(() => {
     if (pdfDoc) {
@@ -42,6 +45,9 @@ export default function PdfPreview({
                 placement={p}
                 onMove={onMove}
                 onRemove={onRemove}
+                onUpdate={onUpdate}
+                scaleFactor={scaleFactor}
+                previewRow={previewRow}
               />
             ))}
           </div>
