@@ -277,12 +277,6 @@ export default function App() {
                 numPages={numPages}
                 onPageChange={goToPage}
               />
-              <DataPreviewToggle
-                previewRowIndex={previewRowIndex}
-                numRows={rows.length}
-                onToggle={(enabled) => setPreviewRowIndex(enabled ? 0 : null)}
-                onRowChange={setPreviewRowIndex}
-              />
             </>
           ) : (
             <div className="preview-placeholder">
@@ -291,6 +285,12 @@ export default function App() {
           )}
         </div>
       </div>
+      <DataPreviewToggle
+        previewRowIndex={previewRowIndex}
+        numRows={rows.length}
+        onToggle={(enabled) => setPreviewRowIndex(enabled ? 0 : null)}
+        onRowChange={setPreviewRowIndex}
+      />
       {progress.total > 0 && (
         <ProgressModal current={progress.current} total={progress.total} />
       )}

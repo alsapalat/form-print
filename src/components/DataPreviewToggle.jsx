@@ -1,4 +1,4 @@
-import './PageNavigation.css';
+import './DataPreviewToggle.css';
 
 export default function DataPreviewToggle({ previewRowIndex, numRows, onToggle, onRowChange }) {
   if (numRows === 0) return null;
@@ -7,18 +7,18 @@ export default function DataPreviewToggle({ previewRowIndex, numRows, onToggle, 
 
   if (!active) {
     return (
-      <div className="page-navigation">
+      <div className="data-preview-toggle">
         <button className="page-btn" onClick={() => onToggle(true)}>
-          Preview Data
+          Preview Mode
         </button>
       </div>
     );
   }
 
   return (
-    <div className="page-navigation">
+    <div className="data-preview-toggle">
       <button className="page-btn" onClick={() => onToggle(false)}>
-        Template
+        Edit Mode
       </button>
       <button
         className="page-btn"
