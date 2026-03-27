@@ -86,6 +86,18 @@ body {
   cursor: default;
 }
 
+.cal-active-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 8px;
+  vertical-align: middle;
+}
+
 .preview-placeholder {
   flex: 1;
   display: flex;

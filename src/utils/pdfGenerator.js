@@ -1,5 +1,6 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { overlayToPdf } from './coordinateMapper';
+import { applyCalibration } from './calibration';
 import { wrapText, LINE_HEIGHT_FACTOR } from './textWrapper';
 import { DEFAULT_FONT_SIZE, DEFAULT_WIDTH, SCALE_FACTOR } from '../constants';
 
@@ -8,7 +9,7 @@ export async function generateSinglePdf(
   placements,
   row,
   pageDimsMap,
-  { textOnly = false } = {},
+  { textOnly = false, calibration = null } = {},
 ) {
   const srcDoc = await PDFDocument.load(originalBytes);
   let pdfDoc;
@@ -36,7 +37,12 @@ export async function generateSinglePdf(
     const dims = pageDimsMap.get(placement.page);
     if (!dims) continue;
 
-    const { pdfX, pdfY } = overlayToPdf(placement.x, placement.y, dims);
+    let { pdfX, pdfY } = overlayToPdf(placement.x, placement.y, dims);
+    if (calibration) {
+      const c = applyCalibration(pdfX, pdfY, dims.pdfH, calibration);
+      pdfX = c.pdfX;
+      pdfY = c.pdfY;
+    }
     const text = String(row[placement.variable] ?? '');
     const fontSize = placement.fontSize ?? DEFAULT_FONT_SIZE;
     const pdfWidth = (placement.width ?? DEFAULT_WIDTH) / SCALE_FACTOR;
@@ -63,7 +69,7 @@ export async function generateAllPdfs(
   rows,
   pageDimsMap,
   onProgress,
-  { textOnly = false } = {},
+  { textOnly = false, calibration = null } = {},
 ) {
   const results = [];
   for (let i = 0; i < rows.length; i++) {
@@ -72,7 +78,7 @@ export async function generateAllPdfs(
       placements,
       rows[i],
       pageDimsMap,
-      { textOnly },
+      { textOnly, calibration },
     );
     results.push({ index: i, bytes: pdfBytes });
     onProgress?.(i + 1, rows.length);

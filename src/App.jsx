@@ -12,6 +12,8 @@ import { useCsvParser } from './hooks/useCsvParser';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
 import { generateAllPdfs } from './utils/pdfGenerator';
 import { downloadAsZip } from './utils/zipDownloader';
+import CalibrationModal from './components/CalibrationModal';
+import { loadCalibration } from './utils/calibration';
 import {
   saveTemplate,
   loadTemplate,
@@ -62,6 +64,8 @@ export default function App() {
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [snapEnabled, setSnapEnabled] = useState(false);
   const [previewRowIndex, setPreviewRowIndex] = useState(null);
+  const [calibration, setCalibration] = useState(() => loadCalibration());
+  const [calModalOpen, setCalModalOpen] = useState(false);
   const importRef = useRef(null);
 
   const snapFn = useCallback(
@@ -193,7 +197,7 @@ export default function App() {
         rows,
         pageDimsRef.current,
         (cur, tot) => setProgress({ current: cur, total: tot }),
-        { textOnly },
+        { textOnly, calibration },
       );
       const suffix = textOnly ? '-print' : '';
       const baseName = (pdfName.replace(/\.pdf$/i, '') || 'output') + suffix;
@@ -201,7 +205,7 @@ export default function App() {
     } finally {
       setProgress({ current: 0, total: 0 });
     }
-  }, [canGenerate, pdfBytes, placements, rows, pageDimsRef, pdfName, renderCurrentPage]);
+  }, [canGenerate, pdfBytes, placements, rows, pageDimsRef, pdfName, renderCurrentPage, calibration]);
 
   const handleGenerate = useCallback(() => runGenerate(false), [runGenerate]);
   const handleGenerateTextOnly = useCallback(() => runGenerate(true), [runGenerate]);
@@ -217,37 +221,47 @@ export default function App() {
         pdfName={pdfName}
         csvName={csvName}
       />
-      {pdfDoc && (
-        <div className="toolbar">
-          <label className="snap-toggle">
-            <input
-              type="checkbox"
-              checked={snapEnabled}
-              onChange={(e) => setSnapEnabled(e.target.checked)}
-            />
-            <span className="snap-toggle-label">Snap to grid</span>
-          </label>
-          <div className="toolbar-separator" />
-          <button
-            className="toolbar-btn"
-            disabled={placements.length === 0}
-            onClick={handleExport}
-            title="Export template"
-          >
-            Export Template
-          </button>
-          <label className="toolbar-btn" title="Import template">
-            Import Template
-            <input
-              ref={importRef}
-              type="file"
-              accept=".json"
-              onChange={handleImport}
-              hidden
-            />
-          </label>
-        </div>
-      )}
+      <div className="toolbar">
+        <button
+          className="toolbar-btn"
+          onClick={() => setCalModalOpen(true)}
+        >
+          Calibrate Printer
+          {calibration && <span className="cal-active-badge">Cal</span>}
+        </button>
+        {pdfDoc && (
+          <>
+            <div className="toolbar-separator" />
+            <label className="snap-toggle">
+              <input
+                type="checkbox"
+                checked={snapEnabled}
+                onChange={(e) => setSnapEnabled(e.target.checked)}
+              />
+              <span className="snap-toggle-label">Snap to grid</span>
+            </label>
+            <div className="toolbar-separator" />
+            <button
+              className="toolbar-btn"
+              disabled={placements.length === 0}
+              onClick={handleExport}
+              title="Export template"
+            >
+              Export Template
+            </button>
+            <label className="toolbar-btn" title="Import template">
+              Import Template
+              <input
+                ref={importRef}
+                type="file"
+                accept=".json"
+                onChange={handleImport}
+                hidden
+              />
+            </label>
+          </>
+        )}
+      </div>
       <div className="workspace">
         <VariablePanel
           headers={headers}
@@ -294,6 +308,11 @@ export default function App() {
       {progress.total > 0 && (
         <ProgressModal current={progress.current} total={progress.total} />
       )}
+      <CalibrationModal
+        isOpen={calModalOpen}
+        onClose={() => setCalModalOpen(false)}
+        onSave={setCalibration}
+      />
     </div>
   );
 }
