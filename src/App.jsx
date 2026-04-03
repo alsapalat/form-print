@@ -13,6 +13,7 @@ import { useDragAndDrop } from './hooks/useDragAndDrop';
 import { generateAllPdfs } from './utils/pdfGenerator';
 import { downloadAsZip } from './utils/zipDownloader';
 import CalibrationModal from './components/CalibrationModal';
+import ParserModal from './components/ParserModal';
 import { loadCalibration } from './utils/calibration';
 import {
   saveTemplate,
@@ -66,6 +67,7 @@ export default function App() {
   const [previewRowIndex, setPreviewRowIndex] = useState(null);
   const [calibration, setCalibration] = useState(() => loadCalibration());
   const [calModalOpen, setCalModalOpen] = useState(false);
+  const [parserModalOpen, setParserModalOpen] = useState(false);
   const importRef = useRef(null);
 
   const snapFn = useCallback(
@@ -229,6 +231,12 @@ export default function App() {
           Calibrate Printer
           {calibration && <span className="cal-active-badge">Cal</span>}
         </button>
+        <button
+          className="toolbar-btn"
+          onClick={() => setParserModalOpen(true)}
+        >
+          Parser
+        </button>
         {pdfDoc && (
           <>
             <div className="toolbar-separator" />
@@ -312,6 +320,10 @@ export default function App() {
         isOpen={calModalOpen}
         onClose={() => setCalModalOpen(false)}
         onSave={setCalibration}
+      />
+      <ParserModal
+        isOpen={parserModalOpen}
+        onClose={() => setParserModalOpen(false)}
       />
     </div>
   );
